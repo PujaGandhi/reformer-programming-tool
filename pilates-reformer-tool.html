@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reformer Flow — Pilates Programming Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sage: #7a9e87;
+    --sage-light: #b8d4c0;
+    --sage-pale: #edf4ef;
+    --warm: #c4956a;
+    --warm-light: #e8d5c4;
+    --warm-pale: #fdf7f2;
+    --stone: #8b8278;
+    --stone-light: #d4cfc9;
+    --stone-pale: #f7f5f3;
+    --ink: #2a2622;
+    --ink-light: #5a5550;
+    --cream: #faf8f5;
+    --white: #ffffff;
+    --border: #e2ddd8;
+    --shadow: 0 2px 12px rgba(42,38,34,0.08);
+    --shadow-lg: 0 8px 32px rgba(42,38,34,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Layout */
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--sage-light);
+    border-radius: 50%;
+  }
+
+  .header-nav {
+    display: flex;
+    gap: 6px;
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.75);
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-color: rgba(255,255,255,0.4);
+  }
+
+  .nav-btn.active {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: white;
+  }
+
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Views */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* Page headers */
+  .page-header {
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .page-subtitle {
+    color: var(--stone);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: white;
+  }
+
+  .btn-primary:hover { background: #3d3830; }
+
+  .btn-sage {
+    background: var(--sage);
+    color: white;
+  }
+
+  .btn-sage:hover { background: #6a8e77; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+
+  .btn-outline:hover { background: var(--stone-pale); border-color: var(--stone-light); }
+
+  .btn-warm {
+    background: var(--warm);
+    color: white;
+  }
+
+  .btn-warm:hover { background: #b08458; }
+
+  .btn-danger {
+    background: transparent;
+    color: #c0392b;
+    border: 1px solid #e8c0bc;
+  }
+
+  .btn-danger:hover { background: #fdf3f3; }
+
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  /* Form elements */
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--stone);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+  }
+
+  input[type=text], input[type=number], select, textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus {
+    border-color: var(--sage);
+    box-shadow: 0 0 0 3px rgba(122,158,135,0.15);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .form-row {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .form-group { display: flex; flex-direction: column; }
+
+  /* ==================== EXERCISE LIBRARY ==================== */
+  .library-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .exercise-list::-webkit-scrollbar { width: 4px; }
+  .exercise-list::-webkit-scrollbar-track { background: transparent; }
+  .exercise-list::-webkit-scrollbar-thumb { background: var(--stone-light); border-radius: 4px; }
+
+  .ex-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    position: relative;
+  }
+
+  .ex-card:hover { border-color: var(--sage-light); background: var(--sage-pale); }
+  .ex-card.selected { border-color: var(--sage); background: var(--sage-pale); box-shadow: 0 0 0 2px rgba(122,158,135,0.2); }
+
+  .ex-card-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .ex-card-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* Tags / badges */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .tag-direction {
+    background: #edf2fb;
+    color: #2c5aa0;
+  }
+
+  .tag-body {
+    background: var(--sage-pale);
+    color: #3d6b50;
+    border: 1px solid var(--sage-light);
+  }
+
+  .tag-body.secondary {
+    background: var(--warm-pale);
+    color: #7a5232;
+    border: 1px solid var(--warm-light);
+  }
+
+  .tag-spring {
+    background: var(--stone-pale);
+    color: var(--stone);
+    border: 1px solid var(--stone-light);
+  }
+
+  /* Spring visualizer */
+  .spring-viz {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .spring-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+
+  .spring-dot.red-on { background: #e74c3c; border-color: #c0392b; color: white; }
+  .spring-dot.blue-on { background: #3498db; border-color: #2980b9; color: white; }
+  .spring-dot.yellow-on { background: #f1c40f; border-color: #d4ac0d; color: #2a2622; }
+  .spring-dot.green-on { background: #2ecc71; border-color: #27ae60; color: white; }
+  .spring-dot.off { background: #f5f5f5; border-color: #ddd; }
+
+  /* Detail panel */
+  .detail-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+  }
+
+  .detail-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: var(--stone);
+    text-align: center;
+    gap: 12px;
+  }
+
+  .detail-empty-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+
+  /* Section heading in detail */
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--stone);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-block {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Direction indicator */
+  .direction-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .dir-supine { background: #edf2fb; color: #2c5aa0; }
+  .dir-prone { background: #fdf0e6; color: #8b4513; }
+  .dir-sidelying { background: #f3edfb; color: #6b3d9a; }
+  .dir-sitting { background: #edfbf0; color: #1a6b3a; }
+  .dir-kneeling { background: #fbedf8; color: #8b0a6e; }
+  .dir-standing { background: #fafbec; color: #5a6b0a; }
+
+  /* Spring setting builder */
+  .spring-builder {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .spring-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--stone-pale);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .spring-row-label {
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 55px;
+    color: var(--stone);
+  }
+
+  .spring-toggle {
+    display: flex;
+    gap: 4px;
+  }
+
+  .spring-toggle button {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 700;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .st-red { border-color: #e74c3c; color: #e74c3c; background: white; }
+  .st-red.on { background: #e74c3c; color: white; }
+  .st-blue { border-color: #3498db; color: #3498db; background: white; }
+  .st-blue.on { background: #3498db; color: white; }
+  .st-yellow { border-color: #d4ac0d; color: #d4ac0d; background: white; }
+  .st-yellow.on { background: #f1c40f; color: #2a2622; }
+  .st-green { border-color: #27ae60; color: #27ae60; background: white; }
+  .st-green.on { background: #2ecc71; color: white; }
+
+  .spring-weight-label {
+    font-size: 11px;
+    color: var(--stone);
+    margin-left: auto;
+  }
+
+  /* Body parts selector */
+  .body-parts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .body-part-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+  }
+
+  .body-part-btn:hover { border-color: var(--sage-light); background: var(--sage-pale); }
+  .body-part-btn.selected.primary { background: var(--sage); border-color: var(--sage); color: white; }
+  .body-part-btn.selected.secondary { background: var(--warm-light); border-color: var(--warm); color: var(--ink); }
+
+  /* Search */
+  .search-bar {
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .search-bar input {
+    padding-left: 36px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 14px;
+  }
+
+  /* ==================== PROGRAM BUILDER ==================== */
+  .builder-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .builder-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .program-sequence {
+    min-height: 400px;
+  }
+
+  .sequence-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    transition: all 0.18s;
+    cursor: grab;
+    position: relative;
+  }
+
+  .sequence-item:hover { box-shadow: var(--shadow); border-color: var(--sage-light); }
+  .sequence-item.dragging { opacity: 0.4; }
+  .sequence-item.drag-over { border-color: var(--sage); background: var(--sage-pale); }
+
+  .seq-number {
+    width: 22px; height: 22px;
+    background: var(--ink);
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .seq-content { flex: 1; min-width: 0; }
+  .seq-name { font-weight: 500; font-size: 13px; color: var(--ink); }
+  .seq-meta { font-size: 11px; color: var(--stone); margin-top: 2px; }
+
+  .seq-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+
+  .sequence-item:hover .seq-actions { opacity: 1; }
+
+  .seq-btn {
+    width: 24px; height: 24px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .seq-btn:hover { background: var(--stone-pale); }
+  .seq-btn.remove:hover { background: #fdf3f3; border-color: #e8c0bc; color: #c0392b; }
+
+  /* Flow analysis */
+  .flow-analysis {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .flow-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .flow-stat {
+    text-align: center;
+    padding: 14px;
+    background: var(--stone-pale);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .flow-stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .flow-stat-label {
+    font-size: 11px;
+    color: var(--stone);
+    margin-top: 4px;
+  }
+
+  .flow-stat.good .flow-stat-value { color: #27ae60; }
+  .flow-stat.warn .flow-stat-value { color: #e67e22; }
+  .flow-stat.bad .flow-stat-value { color: #e74c3c; }
+
+  /* Transition indicators */
+  .transition-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .transition-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--stone-pale);
+  }
+
+  .transition-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .t-good { background: #2ecc71; }
+  .t-warn { background: #f1c40f; }
+  .t-change { background: #e74c3c; }
+
+  /* Add exercise to program */
+  .add-exercise-picker {
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(42,38,34,0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+  }
+
+  .modal-close {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--stone);
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { background: var(--stone-pale); color: var(--ink); }
+
+  /* Notices */
+  .notice {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .notice-info { background: #edf2fb; color: #2c5aa0; border: 1px solid #c0d3f0; }
+  .notice-warn { background: #fef9ec; color: #7d5a00; border: 1px solid #f5dfa0; }
+  .notice-success { background: #edf8f1; color: #1a6b3a; border: 1px solid #a8dbb8; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--stone);
+  }
+
+  .empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  /* Chips for programs list */
+  .program-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .program-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    border-color: var(--sage-light);
+  }
+
+  .program-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .prog-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+
+  .prog-meta {
+    font-size: 12px;
+    color: var(--stone);
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--stone-light); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Reformer Flow
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="switchView('library')">Exercise Library</button>
+    <button class="nav-btn" onclick="switchView('programs')">Programs</button>
+  </nav>
+</header>
+
+<div class="main">
+
+  <!-- ===== LIBRARY VIEW ===== -->
+  <div id="view-library" class="view active">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Exercise Library</h1>
+        <p class="page-subtitle">Codify and manage your reformer exercises</p>
+      </div>
+      <button class="btn btn-sage" onclick="openExerciseModal(null)">+ New Exercise</button>
+    </div>
+
+    <div class="library-grid">
+      <div>
+        <div class="search-bar">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="lib-search" placeholder="Search exercises..." oninput="renderExerciseList()">
+        </div>
+        <div class="exercise-list" id="exercise-list">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <div class="detail-panel" id="detail-panel">
+        <div class="detail-empty">
+          <div class="detail-empty-icon">◎</div>
+          <p style="font-weight:500;">Select an exercise</p>
+          <p style="font-size:13px;">Click any exercise to view or edit its details</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROGRAMS VIEW ===== -->
+  <div id="view-programs" class="view">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Programs</h1>
+        <p class="page-subtitle">Build and optimize session sequences</p>
+      </div>
+      <button class="btn btn-sage" onclick="openProgramBuilder(null)">+ New Program</button>
+    </div>
+
+    <div id="programs-list">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- ===== PROGRAM BUILDER VIEW ===== -->
+  <div id="view-builder" class="view">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title" id="builder-title">Program Builder</h1>
+        <p class="page-subtitle">Drag to reorder · Optimized for minimal transitions</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-outline" onclick="switchView('programs')">← Back</button>
+        <button class="btn btn-sage" onclick="saveProgram()">Save Program</button>
+      </div>
+    </div>
+
+    <div class="builder-layout">
+      <!-- Sidebar: add exercises -->
+      <div class="builder-sidebar">
+        <div class="card" style="padding:1rem;">
+          <div class="section-label">Add Exercises</div>
+          <div class="search-bar" style="margin-bottom:8px;">
+            <span class="search-icon">⌕</span>
+            <input type="text" id="builder-search" placeholder="Filter exercises..." oninput="renderBuilderPicker()">
+          </div>
+          <div class="add-exercise-picker" id="builder-picker">
+            <!-- populated -->
+          </div>
+        </div>
+
+        <div class="card" style="padding:1rem;">
+          <div class="section-label">Program Details</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label>Program Name</label>
+            <input type="text" id="prog-name-input" placeholder="e.g. Lower Body Focus">
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea id="prog-notes-input" placeholder="Client level, focus, etc..." style="min-height:60px;"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main area: sequence + analysis -->
+      <div>
+        <div class="card program-sequence" style="padding:1.25rem; margin-bottom:1.5rem;">
+          <div class="section-label" style="margin-bottom:12px;">Session Sequence</div>
+          <div id="sequence-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">↓</div>
+              <p style="font-weight:500; margin-bottom:4px;">No exercises added yet</p>
+              <p style="font-size:13px;">Click exercises on the left to add them</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-analysis" id="flow-analysis" style="display:none;">
+          <div class="section-label">Flow Analysis</div>
+          <div class="flow-stats" id="flow-stats"></div>
+          <div class="section-label">Transitions</div>
+          <div class="transition-list" id="transition-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== EXERCISE MODAL ===== -->
+<div class="modal-overlay" id="exercise-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">New Exercise</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <input type="hidden" id="edit-id">
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label>Exercise Name *</label>
+        <input type="text" id="ex-name" placeholder="e.g. Footwork - Parallel">
+      </div>
+      <div class="form-group">
+        <label>Body Facing Direction *</label>
+        <select id="ex-direction">
+          <option value="">— Select —</option>
+          <option value="supine">Supine (lying on back, facing up)</option>
+          <option value="prone">Prone (lying on stomach, facing down)</option>
+          <option value="sidelying">Side-lying</option>
+          <option value="sitting">Sitting</option>
+          <option value="kneeling">Kneeling</option>
+          <option value="standing">Standing</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Primary body parts -->
+    <div class="section-block">
+      <div class="section-label">Primary Body Parts</div>
+      <div class="body-parts-grid" id="primary-parts-grid"></div>
+    </div>
+
+    <!-- Secondary body parts -->
+    <div class="section-block">
+      <div class="section-label">Secondary Body Parts</div>
+      <div class="body-parts-grid" id="secondary-parts-grid"></div>
+    </div>
+
+    <!-- Spring settings -->
+    <div class="section-block">
+      <div class="section-label">Spring Settings</div>
+      <div class="notice notice-info">
+        ℹ Toggle springs on/off. Standard reformer has 5 springs (typically 2 red + 1 blue + 1 yellow + 1 green). Adjust to your equipment.
+      </div>
+      <div class="spring-builder" id="spring-builder"></div>
+      <div style="margin-top:10px; font-size:12px; color:var(--stone);" id="spring-summary"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Notes / Cues</label>
+        <textarea id="ex-notes" placeholder="Setup, modifications, teaching cues..."></textarea>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:1rem; border-top:1px solid var(--border); padding-top:1rem;">
+      <button class="btn btn-danger btn-sm" id="delete-btn" onclick="deleteExercise()" style="display:none;">Delete Exercise</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-sage" onclick="saveExercise()">Save Exercise</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const BODY_PARTS = [
+  'Abdominals','Hip Flexors','Glutes','Hamstrings','Quadriceps',
+  'Calves','Adductors','Abductors','Spinal Extensors','Obliques',
+  'Shoulders','Chest','Upper Back','Lats','Biceps','Triceps',
+  'Hip Rotators','Feet & Ankles','Pelvic Floor','Neck'
+];
+
+const DIRECTIONS = {
+  supine: 'Supine',
+  prone: 'Prone',
+  sidelying: 'Side-lying',
+  sitting: 'Sitting',
+  kneeling: 'Kneeling',
+  standing: 'Standing'
+};
+
+const DIR_CLASS = {
+  supine: 'dir-supine', prone: 'dir-prone', sidelying: 'dir-sidelying',
+  sitting: 'dir-sitting', kneeling: 'dir-kneeling', standing: 'dir-standing'
+};
+
+const SPRING_CONFIG = [
+  { id: 'red1', color: 'red', label: 'Red 1', weight: 1.0 },
+  { id: 'red2', color: 'red', label: 'Red 2', weight: 1.0 },
+  { id: 'blue', color: 'blue', label: 'Blue', weight: 0.75 },
+  { id: 'yellow', color: 'yellow', label: 'Yellow', weight: 0.5 },
+  { id: 'green', color: 'green', label: 'Green', weight: 0.25 },
+];
+
+// State
+let exercises = JSON.parse(localStorage.getItem('rf_exercises') || '[]');
+let programs  = JSON.parse(localStorage.getItem('rf_programs') || '[]');
+let selectedExId = null;
+let currentProgram = null;
+let editingSprings = {};
+let editingPrimary = [];
+let editingSecondary = [];
+let dragSrc = null;
+
+// Seed with demo data if empty
+if (!exercises.length) {
+  exercises = [
+    {
+      id: uid(), name: 'Footwork — Parallel Heels', direction: 'supine',
+      primary: ['Quadriceps','Calves','Glutes'], secondary: ['Abdominals','Hip Flexors'],
+      springs: { red1: true, red2: true, blue: false, yellow: false, green: false },
+      notes: 'Feet in parallel on footbar, heels. Full range hip to knee extension.'
+    },
+    {
+      id: uid(), name: 'Footwork — Parallel Toes', direction: 'supine',
+      primary: ['Quadriceps','Calves'], secondary: ['Glutes','Abdominals'],
+      springs: { red1: true, red2: true, blue: false, yellow: false, green: false },
+      notes: 'Toes on footbar, slight plantar flexion.'
+    },
+    {
+      id: uid(), name: 'Footwork — Turnout', direction: 'supine',
+      primary: ['Adductors','Quadriceps','Calves'], secondary: ['Glutes','Abdominals'],
+      springs: { red1: true, red2: true, blue: false, yellow: false, green: false },
+      notes: 'V-position. External rotation from hips.'
+    },
+    {
+      id: uid(), name: 'Hundred', direction: 'supine',
+      primary: ['Abdominals','Hip Flexors'], secondary: ['Hamstrings','Spinal Extensors'],
+      springs: { red1: false, red2: false, blue: true, yellow: false, green: false },
+      notes: 'Tabletop or extended legs. 100 pumps. Coordinate breath.'
+    },
+    {
+      id: uid(), name: 'Short Spine Massage', direction: 'supine',
+      primary: ['Spinal Extensors','Hamstrings'], secondary: ['Abdominals','Glutes'],
+      springs: { red1: false, red2: false, blue: true, yellow: true, green: false },
+      notes: 'Long straps. Articulate through each spinal segment.'
+    },
+    {
+      id: uid(), name: 'Rowing — Front', direction: 'sitting',
+      primary: ['Upper Back','Lats','Shoulders'], secondary: ['Abdominals','Spinal Extensors'],
+      springs: { red1: false, red2: false, blue: true, yellow: false, green: false },
+      notes: 'Sit facing footbar. Row into extension then round back forward.'
+    },
+    {
+      id: uid(), name: 'Long Stretch', direction: 'prone',
+      primary: ['Abdominals','Chest','Shoulders'], secondary: ['Spinal Extensors','Hip Flexors'],
+      springs: { red1: true, red2: false, blue: false, yellow: false, green: false },
+      notes: 'Plank position on carriage. Push out from shoulder girdle.'
+    },
+    {
+      id: uid(), name: 'Down Stretch', direction: 'prone',
+      primary: ['Spinal Extensors','Hip Flexors','Abdominals'], secondary: ['Shoulders','Chest'],
+      springs: { red1: true, red2: false, blue: false, yellow: false, green: false },
+      notes: 'Hips down, spine extended. Reach through crown of head.'
+    },
+    {
+      id: uid(), name: 'Side Splits', direction: 'standing',
+      primary: ['Adductors','Abductors'], secondary: ['Abdominals','Glutes'],
+      springs: { red1: false, red2: false, blue: true, yellow: false, green: false },
+      notes: 'Stand on platform and carriage. Control lateral movement.'
+    },
+    {
+      id: uid(), name: 'Knee Stretches — Round', direction: 'kneeling',
+      primary: ['Abdominals','Hip Flexors'], secondary: ['Spinal Extensors','Quadriceps'],
+      springs: { red1: true, red2: true, blue: false, yellow: false, green: false },
+      notes: 'Kneeling on carriage. Posterior tilt. Push out through knees.'
+    },
+  ];
+  saveData();
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function saveData() {
+  localStorage.setItem('rf_exercises', JSON.stringify(exercises));
+  localStorage.setItem('rf_programs', JSON.stringify(programs));
+}
+
+// ===================== NAVIGATION =====================
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  const idx = { library: 0, programs: 1, builder: 2 }[v];
+  if (idx !== undefined && idx < 2) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+
+  if (v === 'library') renderExerciseList();
+  if (v === 'programs') renderPrograms();
+  if (v === 'builder') renderBuilder();
+}
+
+// ===================== LIBRARY =====================
+function renderExerciseList() {
+  const q = document.getElementById('lib-search').value.toLowerCase();
+  const list = document.getElementById('exercise-list');
+  const filtered = exercises.filter(e =>
+    e.name.toLowerCase().includes(q) ||
+    (e.primary||[]).some(p => p.toLowerCase().includes(q)) ||
+    (DIRECTIONS[e.direction]||'').toLowerCase().includes(q)
+  );
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:2rem 1rem;"><p>No exercises found</p></div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(e => `
+    <div class="ex-card ${selectedExId === e.id ? 'selected' : ''}" onclick="selectExercise('${e.id}')">
+      <div class="ex-card-name">${e.name}</div>
+      <div class="ex-card-meta">
+        ${e.direction ? `<span class="tag tag-direction">${DIRECTIONS[e.direction]||e.direction}</span>` : ''}
+        ${(e.primary||[]).slice(0,2).map(p => `<span class="tag tag-body">${p}</span>`).join('')}
+      </div>
+      <div class="spring-viz">${springViz(e.springs)}</div>
+    </div>
+  `).join('');
+}
+
+function springViz(springs) {
+  return SPRING_CONFIG.map(s => {
+    const on = springs && springs[s.id];
+    const cls = on ? `${s.color}-on` : 'off';
+    return `<div class="spring-dot ${cls}" title="${s.label}: ${on?'ON':'off'}">${s.color[0].toUpperCase()}</div>`;
+  }).join('');
+}
+
+function selectExercise(id) {
+  selectedExId = id;
+  renderExerciseList();
+  const e = exercises.find(x => x.id === id);
+  if (!e) return;
+
+  const springTotal = SPRING_CONFIG.reduce((sum, s) => sum + (e.springs&&e.springs[s.id] ? s.weight : 0), 0);
+
+  document.getElementById('detail-panel').innerHTML = `
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:8px;">
+      <div>
+        <h2 style="font-family:'DM Serif Display',serif; font-size:1.5rem; margin-bottom:6px;">${e.name}</h2>
+        <span class="direction-badge ${DIR_CLASS[e.direction]||''}">${DIRECTIONS[e.direction]||e.direction||'—'}</span>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="openExerciseModal('${e.id}')">Edit</button>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Primary Body Parts</div>
+      <div class="body-parts-grid">
+        ${(e.primary||[]).map(p => `<span class="tag tag-body">${p}</span>`).join('') || '<span style="color:var(--stone); font-size:13px;">None set</span>'}
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Secondary Body Parts</div>
+      <div class="body-parts-grid">
+        ${(e.secondary||[]).map(p => `<span class="tag tag-body secondary">${p}</span>`).join('') || '<span style="color:var(--stone); font-size:13px;">None set</span>'}
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-label">Spring Settings</div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <div class="spring-viz">${springViz(e.springs)}</div>
+        <span style="font-size:13px; color:var(--stone);">${springTotal.toFixed(2)} units total</span>
+        <span style="font-size:12px; color:var(--stone-light);">·</span>
+        <span style="font-size:13px; color:var(--stone);">${springDescription(e.springs)}</span>
+      </div>
+    </div>
+
+    ${e.notes ? `
+    <div class="section-block">
+      <div class="section-label">Notes & Cues</div>
+      <p style="font-size:14px; color:var(--ink-light); line-height:1.7;">${e.notes}</p>
+    </div>` : ''}
+  `;
+}
+
+function springDescription(springs) {
+  if (!springs) return '—';
+  const on = SPRING_CONFIG.filter(s => springs[s.id]);
+  if (!on.length) return 'No springs';
+  const grouped = {};
+  on.forEach(s => { grouped[s.color] = (grouped[s.color]||0) + 1; });
+  return Object.entries(grouped).map(([c, n]) => `${n}×${c[0].toUpperCase()}${c.slice(1)}`).join(' + ');
+}
+
+// ===================== EXERCISE MODAL =====================
+function openExerciseModal(id) {
+  editingSprings = {};
+  editingPrimary = [];
+  editingSecondary = [];
+
+  const e = id ? exercises.find(x => x.id === id) : null;
+  document.getElementById('modal-title').textContent = e ? 'Edit Exercise' : 'New Exercise';
+  document.getElementById('edit-id').value = e ? e.id : '';
+  document.getElementById('ex-name').value = e ? e.name : '';
+  document.getElementById('ex-direction').value = e ? e.direction : '';
+  document.getElementById('ex-notes').value = e ? (e.notes||'') : '';
+  document.getElementById('delete-btn').style.display = e ? 'inline-flex' : 'none';
+
+  if (e) {
+    editingSprings = Object.assign({}, e.springs || {});
+    editingPrimary = [...(e.primary||[])];
+    editingSecondary = [...(e.secondary||[])];
+  }
+
+  renderModalBodyParts();
+  renderModalSprings();
+  document.getElementById('exercise-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('exercise-modal').classList.remove('open');
+}
+
+function renderModalBodyParts() {
+  const pGrid = document.getElementById('primary-parts-grid');
+  const sGrid = document.getElementById('secondary-parts-grid');
+
+  pGrid.innerHTML = BODY_PARTS.map(p => `
+    <button class="body-part-btn ${editingPrimary.includes(p) ? 'selected primary' : ''}"
+      onclick="toggleBodyPart('primary','${p}')">${p}</button>
+  `).join('');
+
+  sGrid.innerHTML = BODY_PARTS.map(p => `
+    <button class="body-part-btn ${editingSecondary.includes(p) ? 'selected secondary' : ''}"
+      onclick="toggleBodyPart('secondary','${p}')">${p}</button>
+  `).join('');
+}
+
+function toggleBodyPart(type, part) {
+  if (type === 'primary') {
+    if (editingPrimary.includes(part)) editingPrimary = editingPrimary.filter(x => x !== part);
+    else { editingPrimary.push(part); editingSecondary = editingSecondary.filter(x => x !== part); }
+  } else {
+    if (editingSecondary.includes(part)) editingSecondary = editingSecondary.filter(x => x !== part);
+    else { editingSecondary.push(part); editingPrimary = editingPrimary.filter(x => x !== part); }
+  }
+  renderModalBodyParts();
+}
+
+function renderModalSprings() {
+  const builder = document.getElementById('spring-builder');
+  const colorGroups = {};
+  SPRING_CONFIG.forEach(s => {
+    if (!colorGroups[s.color]) colorGroups[s.color] = [];
+    colorGroups[s.color].push(s);
+  });
+
+  builder.innerHTML = SPRING_CONFIG.map(s => {
+    const on = !!editingSprings[s.id];
+    return `
+      <div class="spring-row">
+        <span class="spring-row-label">${s.label}</span>
+        <button class="spring-toggle st-${s.color} ${on ? 'on' : ''}"
+          onclick="toggleSpring('${s.id}')" style="width:52px; height:28px; border-radius:6px; border:2px solid; cursor:pointer; font-size:11px; font-weight:500; transition:all .15s; font-family:'DM Sans',sans-serif;">
+          ${on ? 'ON' : 'off'}
+        </button>
+        <span class="spring-weight-label">${s.weight} unit${s.weight!==1?'s':''}</span>
+      </div>
+    `;
+  }).join('');
+  updateSpringSummary();
+}
+
+function toggleSpring(id) {
+  editingSprings[id] = !editingSprings[id];
+  renderModalSprings();
+}
+
+function updateSpringSummary() {
+  const total = SPRING_CONFIG.reduce((sum, s) => sum + (editingSprings[s.id] ? s.weight : 0), 0);
+  const desc = springDescription(editingSprings);
+  document.getElementById('spring-summary').textContent = `Total: ${total.toFixed(2)} units — ${desc}`;
+}
+
+function saveExercise() {
+  const name = document.getElementById('ex-name').value.trim();
+  if (!name) { alert('Please enter an exercise name.'); return; }
+  const direction = document.getElementById('ex-direction').value;
+  if (!direction) { alert('Please select a body direction.'); return; }
+
+  const id = document.getElementById('edit-id').value;
+  const ex = {
+    id: id || uid(),
+    name,
+    direction,
+    primary: [...editingPrimary],
+    secondary: [...editingSecondary],
+    springs: Object.assign({}, editingSprings),
+    notes: document.getElementById('ex-notes').value.trim(),
+  };
+
+  if (id) exercises = exercises.map(e => e.id === id ? ex : e);
+  else exercises.push(ex);
+
+  saveData();
+  closeModal();
+  renderExerciseList();
+  selectExercise(ex.id);
+}
+
+function deleteExercise() {
+  const id = document.getElementById('edit-id').value;
+  if (!id) return;
+  if (!confirm('Delete this exercise? It will also be removed from any programs.')) return;
+  exercises = exercises.filter(e => e.id !== id);
+  programs = programs.map(p => ({ ...p, sequence: p.sequence.filter(s => s !== id) }));
+  saveData();
+  closeModal();
+  selectedExId = null;
+  renderExerciseList();
+  document.getElementById('detail-panel').innerHTML = `<div class="detail-empty"><div class="detail-empty-icon">◎</div><p style="font-weight:500;">Select an exercise</p></div>`;
+}
+
+// ===================== PROGRAMS =====================
+function renderPrograms() {
+  const container = document.getElementById('programs-list');
+  if (!programs.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">▤</div><p style="font-weight:500; margin-bottom:4px;">No programs yet</p><p style="font-size:13px;">Create a program to start building optimized session sequences</p></div>`;
+    return;
+  }
+  container.innerHTML = `<div class="program-grid">${programs.map(p => {
+    const count = (p.sequence||[]).length;
+    const changes = countChanges(p.sequence||[]);
+    return `
+      <div class="program-card" onclick="openProgramBuilder('${p.id}')">
+        <div class="prog-name">${p.name||'Untitled Program'}</div>
+        <div class="prog-meta">
+          <span>${count} exercise${count!==1?'s':''}</span>
+          <span>${changes} spring change${changes!==1?'s':''}</span>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
+          ${(p.sequence||[]).slice(0,4).map(id => {
+            const e = exercises.find(x => x.id === id);
+            return e ? `<span class="tag tag-direction" style="font-size:10px;">${DIRECTIONS[e.direction]||e.direction}</span>` : '';
+          }).join('')}
+          ${count > 4 ? `<span style="font-size:10px; color:var(--stone);">+${count-4} more</span>` : ''}
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openProgramBuilder('${p.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteProgram('${p.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
+function deleteProgram(id) {
+  if (!confirm('Delete this program?')) return;
+  programs = programs.filter(p => p.id !== id);
+  saveData();
+  renderPrograms();
+}
+
+function countChanges(sequence) {
+  let changes = 0;
+  for (let i = 1; i < sequence.length; i++) {
+    const a = exercises.find(x => x.id === sequence[i-1]);
+    const b = exercises.find(x => x.id === sequence[i]);
+    if (a && b && !springsMatch(a.springs, b.springs)) changes++;
+  }
+  return changes;
+}
+
+function springsMatch(a, b) {
+  return SPRING_CONFIG.every(s => !!a[s.id] === !!b[s.id]);
+}
+
+// ===================== PROGRAM BUILDER =====================
+function openProgramBuilder(id) {
+  if (id) {
+    currentProgram = programs.find(p => p.id === id);
+    if (currentProgram) currentProgram = JSON.parse(JSON.stringify(currentProgram)); // clone
+  } else {
+    currentProgram = { id: uid(), name: '', notes: '', sequence: [] };
+  }
+  switchView('builder');
+}
+
+function renderBuilder() {
+  document.getElementById('prog-name-input').value = currentProgram.name || '';
+  document.getElementById('prog-notes-input').value = currentProgram.notes || '';
+  document.getElementById('builder-title').textContent = currentProgram.name || 'Program Builder';
+  renderBuilderPicker();
+  renderSequence();
+}
+
+function renderBuilderPicker() {
+  const q = document.getElementById('builder-search').value.toLowerCase();
+  const picker = document.getElementById('builder-picker');
+  const filtered = exercises.filter(e =>
+    e.name.toLowerCase().includes(q) ||
+    (DIRECTIONS[e.direction]||'').toLowerCase().includes(q)
+  );
+
+  picker.innerHTML = filtered.map(e => `
+    <div class="ex-card" style="margin-bottom:6px; cursor:pointer;" onclick="addToSequence('${e.id}')">
+      <div class="ex-card-name" style="font-size:12px;">${e.name}</div>
+      <div class="ex-card-meta" style="margin-top:3px;">
+        <span class="tag tag-direction" style="font-size:10px;">${DIRECTIONS[e.direction]||e.direction}</span>
+      </div>
+      <div class="spring-viz" style="margin-top:4px;">${springViz(e.springs)}</div>
+    </div>
+  `).join('') || '<p style="font-size:13px; color:var(--stone); padding:8px 0;">No matches</p>';
+}
+
+function addToSequence(exId) {
+  currentProgram.sequence.push(exId);
+  renderSequence();
+}
+
+function removeFromSequence(idx) {
+  currentProgram.sequence.splice(idx, 1);
+  renderSequence();
+}
+
+function renderSequence() {
+  const list = document.getElementById('sequence-list');
+  const analysis = document.getElementById('flow-analysis');
+
+  if (!currentProgram.sequence.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">↓</div><p style="font-weight:500; margin-bottom:4px;">No exercises added yet</p><p style="font-size:13px;">Click exercises on the left to add them</p></div>`;
+    analysis.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = currentProgram.sequence.map((exId, i) => {
+    const e = exercises.find(x => x.id === exId);
+    if (!e) return '';
+    const prev = i > 0 ? exercises.find(x => x.id === currentProgram.sequence[i-1]) : null;
+    const dirChange = prev && prev.direction !== e.direction;
+    const springChange = prev && !springsMatch(prev.springs, e.springs);
+
+    return `
+      <div class="sequence-item" draggable="true"
+        ondragstart="dragStart(event,${i})" ondragover="dragOver(event,${i})"
+        ondrop="dragDrop(event,${i})" ondragleave="dragLeave(event)"
+        id="seq-item-${i}">
+        <div class="seq-number">${i+1}</div>
+        <div class="seq-content">
+          <div class="seq-name">${e.name}</div>
+          <div class="seq-meta" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:3px;">
+            <span class="tag ${DIR_CLASS[e.direction]||''}" style="font-size:10px;">${DIRECTIONS[e.direction]||e.direction}</span>
+            ${(e.primary||[]).slice(0,2).map(p => `<span class="tag tag-body" style="font-size:10px;">${p}</span>`).join('')}
+            <div class="spring-viz" style="gap:3px;">${springViz(e.springs)}</div>
+          </div>
+          ${dirChange||springChange ? `
+          <div style="margin-top:5px; display:flex; gap:6px; flex-wrap:wrap;">
+            ${dirChange ? '<span style="font-size:10px; color:#e67e22; background:#fef9ec; padding:2px 7px; border-radius:10px; border:1px solid #f5dfa0;">↻ Position change</span>' : ''}
+            ${springChange ? '<span style="font-size:10px; color:#e74c3c; background:#fdf3f3; padding:2px 7px; border-radius:10px; border:1px solid #f5c8c8;">⚙ Spring change</span>' : ''}
+          </div>` : ''}
+        </div>
+        <div class="seq-actions">
+          <button class="seq-btn" onclick="moveSeq(${i}, -1)" title="Move up">↑</button>
+          <button class="seq-btn" onclick="moveSeq(${i}, 1)" title="Move down">↓</button>
+          <button class="seq-btn remove" onclick="removeFromSequence(${i})" title="Remove">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  renderFlowAnalysis();
+}
+
+function moveSeq(idx, dir) {
+  const seq = currentProgram.sequence;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= seq.length) return;
+  [seq[idx], seq[newIdx]] = [seq[newIdx], seq[idx]];
+  renderSequence();
+}
+
+// Drag & drop
+function dragStart(e, i) { dragSrc = i; e.currentTarget.classList.add('dragging'); }
+function dragOver(e, i) { e.preventDefault(); document.getElementById('seq-item-'+i)?.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dragDrop(e, i) {
+  e.preventDefault();
+  document.getElementById('seq-item-'+i)?.classList.remove('drag-over');
+  if (dragSrc === null || dragSrc === i) return;
+  const seq = currentProgram.sequence;
+  const [moved] = seq.splice(dragSrc, 1);
+  seq.splice(i, 0, moved);
+  dragSrc = null;
+  renderSequence();
+}
+
+function renderFlowAnalysis() {
+  const seq = currentProgram.sequence;
+  if (seq.length < 2) {
+    document.getElementById('flow-analysis').style.display = 'none';
+    return;
+  }
+  document.getElementById('flow-analysis').style.display = 'block';
+
+  let springChanges = 0, dirChanges = 0;
+  const transitions = [];
+
+  for (let i = 1; i < seq.length; i++) {
+    const a = exercises.find(x => x.id === seq[i-1]);
+    const b = exercises.find(x => x.id === seq[i]);
+    if (!a || !b) continue;
+    const sc = !springsMatch(a.springs, b.springs);
+    const dc = a.direction !== b.direction;
+    if (sc) springChanges++;
+    if (dc) dirChanges++;
+    transitions.push({ from: a.name, to: b.name, springChange: sc, dirChange: dc });
+  }
+
+  const total = seq.length - 1;
+  const smoothPct = Math.round(((total - Math.max(springChanges, dirChanges)) / total) * 100);
+
+  document.getElementById('flow-stats').innerHTML = `
+    <div class="flow-stat ${springChanges===0?'good':springChanges<=2?'warn':'bad'}">
+      <div class="flow-stat-value">${springChanges}</div>
+      <div class="flow-stat-label">Spring changes</div>
+    </div>
+    <div class="flow-stat ${dirChanges===0?'good':dirChanges<=2?'warn':'bad'}">
+      <div class="flow-stat-value">${dirChanges}</div>
+      <div class="flow-stat-label">Position changes</div>
+    </div>
+    <div class="flow-stat ${smoothPct>=80?'good':smoothPct>=60?'warn':'bad'}">
+      <div class="flow-stat-value">${smoothPct}%</div>
+      <div class="flow-stat-label">Flow score</div>
+    </div>
+  `;
+
+  document.getElementById('transition-list').innerHTML = transitions.map(t => {
+    const cls = t.springChange || t.dirChange ? (t.springChange && t.dirChange ? 't-change' : 't-warn') : 't-good';
+    const label = t.springChange && t.dirChange ? 'Position + spring change'
+      : t.springChange ? 'Spring change'
+      : t.dirChange ? 'Position change' : 'Smooth transition';
+    return `
+      <div class="transition-item">
+        <div class="transition-dot ${cls}"></div>
+        <span style="color:var(--stone);">${t.from}</span>
+        <span style="color:var(--stone-light);">→</span>
+        <span>${t.to}</span>
+        <span style="margin-left:auto; font-size:11px; color:var(--stone);">${label}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function saveProgram() {
+  const name = document.getElementById('prog-name-input').value.trim() || 'Untitled Program';
+  currentProgram.name = name;
+  currentProgram.notes = document.getElementById('prog-notes-input').value.trim();
+
+  const idx = programs.findIndex(p => p.id === currentProgram.id);
+  if (idx >= 0) programs[idx] = currentProgram;
+  else programs.push(currentProgram);
+
+  saveData();
+  document.getElementById('builder-title').textContent = name;
+
+  const notice = document.createElement('div');
+  notice.className = 'notice notice-success';
+  notice.style.cssText = 'position:fixed; bottom:1.5rem; right:1.5rem; z-index:300; min-width:200px;';
+  notice.textContent = '✓ Program saved';
+  document.body.appendChild(notice);
+  setTimeout(() => notice.remove(), 2500);
+}
+
+// ===================== INIT =====================
+renderExerciseList();
+</script>
+</body>
+</html>
